@@ -26,5 +26,4 @@ public class ProductTestData {
     @Builder.Default
     private LocalDateTime created = LocalDateTime.of(2023, 7, 3, 13, 0, 0);
 
-
 }
