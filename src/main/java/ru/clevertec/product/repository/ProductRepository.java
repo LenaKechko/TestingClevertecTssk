@@ -9,7 +9,7 @@ import java.util.UUID;
 public interface ProductRepository {
 
     /**
-     * Ищет в памяти продукт по идентификатору
+     * ищет в памяти продукт по идентификатору
      *
      * @param uuid идентификатор продукта
      * @return Optional<Product> если найден, иначе Optional.empty()
@@ -17,7 +17,7 @@ public interface ProductRepository {
     Optional<Product> findById(UUID uuid);
 
     /**
-     * Ищет все продукты в памяти
+     * ищет все продукты в памяти
      *
      * @return список найденных продуктов
      */

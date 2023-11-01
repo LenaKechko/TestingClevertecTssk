@@ -8,6 +8,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
+import ru.clevertec.product.mapper.ProductMapper;
+import ru.clevertec.product.mapper.ProductMapperImpl;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -20,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class ProductMapperImplTest {
 
-    private ProductMapperImpl productMapper;
+    private ProductMapper productMapper;
 
     @BeforeEach
     void setUp() {
@@ -87,7 +89,7 @@ class ProductMapperImplTest {
     void mergeShouldReturnUpdateProductWithNewNameAndDescription(Product product) {
         // given
         ProductDto productDto = new ProductDto("ПРОДУКТ",
-                "ОПИСАНИЕ ПРОДУКТА", product.getPrice());
+                "описание ПРОДУКТА", product.getPrice());
         Product expected = new Product(product.getUuid(), productDto.name(), productDto.description(),
                 productDto.price(), product.getCreated());
 
