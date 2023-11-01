@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
+import ru.clevertec.product.entity.ProductValidator;
 import ru.clevertec.product.exception.ProductNotFoundException;
 import ru.clevertec.product.mapper.ProductMapper;
 import ru.clevertec.product.repository.ProductRepository;
@@ -24,6 +25,7 @@ import java.util.UUID;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -38,6 +40,9 @@ class ProductServiceImplTest {
 
     @Mock
     private ProductRepository productRepository;
+
+    @Mock
+    private ProductValidator productValidator;
 
     @InjectMocks
     private ProductServiceImpl productService;
@@ -69,8 +74,10 @@ class ProductServiceImplTest {
         doReturn(expected)
                 .when(productMapper)
                 .toInfoProductDto(productSaving);
+
         // when
         InfoProductDto actual = productService.get(uuid);
+
         // then
         assertEquals(expected, actual);
         verify(productRepository).findById(uuid);
@@ -103,7 +110,7 @@ class ProductServiceImplTest {
 
     @Test
     void getAllShouldReturnInfoProductDtoList() {
-        //given
+        // given
         List<Product> productList = List.of(
                 new Product(UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584"),
                         "Продукт", "Описание", BigDecimal.valueOf(1), LocalDateTime.MIN),
@@ -129,16 +136,17 @@ class ProductServiceImplTest {
                         .map(product -> productMapper.toInfoProductDto(product))
                         .toList());
 
-        //when
+        // when
         List<InfoProductDto> actualList = productService.getAll();
-        //then
+
+        // then
         assertEquals(expectedList, actualList);
         verify(productRepository).findAll();
     }
 
     @Test
     void createShouldReturnUuidWhenProductSave() {
-        //given
+        // given
         Product productToSave = ProductTestData.builder()
                 .withUuid(null)
                 .build().buildProduct();
@@ -149,31 +157,68 @@ class ProductServiceImplTest {
 
         doReturn(productToSave)
                 .when(productMapper).toProduct(productDto);
+        when(productValidator.checkValidation(productToSave))
+                .thenReturn(productToSave);
+
         when(productRepository.save(productToSave)).thenReturn(expected);
 
         UUID expectedUuid = ProductTestData.builder().build().getUuid();
 
-        //when
+        // when
         UUID actualUuid = productService.create(productDto);
-        //then
+
+        // then
         assertEquals(expectedUuid, actualUuid);
+
         verify(productRepository).save(productCaptor.capture());
         assertThat(productCaptor.getValue())
                 .hasFieldOrPropertyWithValue(Product.Fields.uuid, null);
     }
 
     @Test
-    void updateShouldUpdateDescriptionAndPriceInProduct() {
-        //given
+    void createShouldReturnUuidWhenProductRepositoryThrowException() {
+        // given
+        Product productToSave = ProductTestData.builder()
+                .withUuid(null)
+                .withPrice(BigDecimal.valueOf(-1))
+                .build().buildProduct();
+        Product expected = ProductTestData.builder()
+                .build().buildProduct();
+        ProductDto productDto = ProductTestData.builder()
+                .withPrice(BigDecimal.valueOf(-1))
+                .build().buildProductDto();
+
+        doReturn(productToSave)
+                .when(productMapper).toProduct(productDto);
+
+        when(productValidator.checkValidation(productToSave))
+                .thenReturn(null);
+
+        doThrow(IllegalArgumentException.class)
+                .when(productRepository.save(null));
+
+        // when-then
+        assertThrows(IllegalArgumentException.class, () -> productService.create(productDto));
+
+        verify(productValidator).checkValidation(productCaptor.capture());
+        assertNotNull(productCaptor.getValue());
+
+        verify(productRepository).save(productCaptor.capture());
+        assertNull(productCaptor.getValue());
+    }
+
+    @Test
+    void updateShouldUpdateDescriptionAndPriceInProductWhenDataCorrect() {
+        // given
         UUID uuid = ProductTestData.builder().build().getUuid();
         Product productToUpdate = ProductTestData.builder()
                 .build().buildProduct();
         ProductDto productDtoToUpdate = ProductTestData.builder()
-                .withDescription("My new description")
+                .withDescription("Новое описание продукта")
                 .withPrice(BigDecimal.valueOf(4))
                 .build().buildProductDto();
         Product excepted = ProductTestData.builder()
-                .withDescription("My new description")
+                .withDescription("Новое описание продукта")
                 .withPrice(BigDecimal.valueOf(4))
                 .build().buildProduct();
 
@@ -183,11 +228,17 @@ class ProductServiceImplTest {
         doReturn(excepted)
                 .when(productMapper).merge(productToUpdate, productDtoToUpdate);
 
-        //when
+        doReturn(excepted)
+                .when(productValidator).checkValidation(excepted);
+
+        when(productRepository.save(excepted))
+                .thenReturn(excepted);
+
+        // when
         productService.update(uuid, productDtoToUpdate);
-        //then
+
+        // then
         verify(productMapper).merge(productToUpdate, productDtoToUpdate);
-        verify(productRepository).save(productToUpdate);
 
         verify(productMapper).merge(productCaptor.capture(), productDtoToUpdate);
         assertNotNull(productCaptor.getValue());
@@ -196,16 +247,56 @@ class ProductServiceImplTest {
         assertThat(productCaptor.getValue())
                 .hasFieldOrPropertyWithValue(Product.Fields.description, excepted.getDescription())
                 .hasFieldOrPropertyWithValue(Product.Fields.price, excepted.getPrice());
+
         assertEquals(excepted, productCaptor.getValue());
     }
 
     @Test
-    void deleteShouldDeleteProductUsingUuid() {
-        //given
+    void updateShouldNotUpdateWhenIncorrectDescriptionInProduct() {
+        // given
         UUID uuid = ProductTestData.builder().build().getUuid();
-        //when
+        Product productToUpdate = ProductTestData.builder()
+                .build().buildProduct();
+        ProductDto productDtoToUpdate = ProductTestData.builder()
+                .withDescription("My new description")
+                .build().buildProductDto();
+        Product productAfterMerge = ProductTestData.builder()
+                .withDescription("My new description")
+                .build().buildProduct();
+
+        when(productRepository.findById(uuid).orElseThrow())
+                .thenReturn(productToUpdate);
+
+        doReturn(productAfterMerge)
+                .when(productMapper).merge(productToUpdate, productDtoToUpdate);
+
+        when(productValidator.checkValidation(productAfterMerge))
+                .thenReturn(null);
+
+        doThrow(IllegalArgumentException.class)
+                .when(productRepository.save(null));
+
+        // when-then
+        assertThrows(IllegalArgumentException.class, () -> productService.update(uuid, productDtoToUpdate));
+
+        verify(productMapper).merge(productToUpdate, productDtoToUpdate);
+
+        verify(productValidator).checkValidation(productCaptor.capture());
+        assertNotNull(productCaptor.getValue());
+
+        verify(productRepository).save(productCaptor.capture());
+        assertNull(productCaptor.getValue());
+    }
+
+    @Test
+    void deleteShouldDeleteProductUsingUuid() {
+        // given
+        UUID uuid = ProductTestData.builder().build().getUuid();
+
+        // when
         productService.delete(uuid);
-        //then
+
+        // then
         verify(productRepository).delete(uuid);
     }
 }

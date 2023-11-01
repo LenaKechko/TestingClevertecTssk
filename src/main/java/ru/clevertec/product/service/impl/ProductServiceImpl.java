@@ -3,6 +3,7 @@ package ru.clevertec.product.service.impl;
 import lombok.RequiredArgsConstructor;
 import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
+import ru.clevertec.product.entity.ProductValidator;
 import ru.clevertec.product.mapper.ProductMapper;
 import ru.clevertec.product.repository.ProductRepository;
 import ru.clevertec.product.service.ProductService;
@@ -15,6 +16,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductMapper mapper;
     private final ProductRepository productRepository;
+    private final ProductValidator productValidator;
 
     @Override
     public InfoProductDto get(UUID uuid) {
