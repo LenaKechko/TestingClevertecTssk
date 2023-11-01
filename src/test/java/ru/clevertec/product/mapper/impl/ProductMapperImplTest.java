@@ -29,19 +29,21 @@ class ProductMapperImplTest {
 
     @ParameterizedTest
     @CsvSource({
-            "My product, My description, 1",
-            "My product 1, My description 1, 2",
-            "My product 2, My description 2, 3"
+            "Продукт, Описание, 1",
+            "Продукт 1, Описание 1, 2",
+            "Продукт 2, Описание 2, 3"
     })
     void toProductShouldReturnProductCheckEqualsFields(String name, String description, int price) {
-        //given
+        // given
         ProductDto productDto = new ProductDto(name,
                 description, BigDecimal.valueOf(price));
         Product expected = new Product(null, name,
-                description, BigDecimal.valueOf(price), null);
-        //when
+                description, BigDecimal.valueOf(price), LocalDateTime.MIN);
+
+        // when
         Product actual = productMapper.toProduct(productDto);
-        //then
+
+        // then
         assertThat(actual)
                 .hasFieldOrPropertyWithValue(Product.Fields.name, expected.getName())
                 .hasFieldOrPropertyWithValue(Product.Fields.description, expected.getDescription())
@@ -50,53 +52,60 @@ class ProductMapperImplTest {
 
     @ParameterizedTest
     @CsvSource({
-            "My product, My description, 1",
-            "My product 1, My description 1, 2",
-            "My product 2, My description 2, 3"
+            "Продукт, Описание, 1",
+            "Продукт 1, Описание 1, 2",
+            "Продукт 2, Описание 2, 3"
     })
-    void toProductShouldReturnProductWhichExist(String name, String description, int price) {
-        //given
+    void toProductShouldReturnProductCheckExistence(String name, String description, int price) {
+        // given
         ProductDto productDto = new ProductDto(name,
                 description, BigDecimal.valueOf(price));
-        //when
+
+        // when
         Product actual = productMapper.toProduct(productDto);
-        //then
+
+        // then
         assertNotNull(actual);
     }
 
     @ParameterizedTest
     @MethodSource("provideArgumentsProduct")
     void toInfoProductDtoShouldReturnObjectInfoProductDto(Product product) {
-        //given
-        InfoProductDto expected = new InfoProductDto(product.getUuid(), product.getName(), product.getDescription(), product.getPrice());
-        //when
+        // given
+        InfoProductDto expected = new InfoProductDto(product.getUuid(),
+                product.getName(), product.getDescription(), product.getPrice());
+
+        // when
         InfoProductDto actual = productMapper.toInfoProductDto(product);
-        //then
+
+        // then
         assertEquals(expected, actual);
     }
 
     @ParameterizedTest
     @MethodSource("provideArgumentsProduct")
     void mergeShouldReturnUpdateProductWithNewNameAndDescription(Product product) {
-        //given
-        ProductDto productDto = new ProductDto("New product name",
-                "New description product", product.getPrice());
+        // given
+        ProductDto productDto = new ProductDto("ПРОДУКТ",
+                "ОПИСАНИЕ ПРОДУКТА", product.getPrice());
         Product expected = new Product(product.getUuid(), productDto.name(), productDto.description(),
                 productDto.price(), product.getCreated());
-        //when
+
+        // when
         Product actual = productMapper.merge(product, productDto);
-        //then
+
+        // then
         assertEquals(expected, actual);
     }
 
     public static Stream<Arguments> provideArgumentsProduct() {
         return Stream.of(
                 Arguments.of(new Product(UUID.fromString("ee892366-b605-4745-9515-ee7cdd0cebeb"),
-                                "My product", "My description", BigDecimal.valueOf(1), LocalDateTime.MIN),
+                                "Продукт", "Описание", BigDecimal.valueOf(1), LocalDateTime.MIN),
                         new Product(UUID.fromString("d303c1e9-f3da-45e0-9d25-0a9d39336fd3"),
-                                "My product 1", "My description 1", BigDecimal.valueOf(2), LocalDateTime.MIN),
+                                "Продукт 1", "Описание 1", BigDecimal.valueOf(2), LocalDateTime.MIN),
                         new Product(UUID.fromString("2a5304d2-d4e1-423f-a209-945167d57980"),
-                                "My product 2", "My description 2", BigDecimal.valueOf(3), LocalDateTime.MIN))
+                                "Продукт 2", "Описание 2", BigDecimal.valueOf(3), LocalDateTime.MIN))
         );
     }
 
