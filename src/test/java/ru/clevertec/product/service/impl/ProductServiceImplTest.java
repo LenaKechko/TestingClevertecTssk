@@ -50,8 +50,8 @@ class ProductServiceImplTest {
 
     @Test
     void getShouldReturnInfoProductDtoWithExistUUID() {
-        //given
-        UUID uuid = UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584");
+        // given
+        UUID uuid = ProductTestData.builder().build().getUuid();
         Product productToSave = ProductTestData.builder()
                 .withUuid(null)
                 .build().buildProduct();
@@ -69,15 +69,16 @@ class ProductServiceImplTest {
         doReturn(expected)
                 .when(productMapper)
                 .toInfoProductDto(productSaving);
-        //when
+        // when
         InfoProductDto actual = productService.get(uuid);
-        //then
+        // then
         assertEquals(expected, actual);
         verify(productRepository).findById(uuid);
     }
 
     @Test
     void getShouldReturnProductNotFoundException() {
+        // given
         UUID uuid = UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150585");
         Product productToSave = ProductTestData.builder()
                 .withUuid(null)
@@ -92,6 +93,7 @@ class ProductServiceImplTest {
                 .thenReturn(expectedOptional);
         doThrow(expectedException).when(productService).get(uuid);
 
+        // when-then
         assertThrows(ProductNotFoundException.class, () -> productService.get(uuid));
 
         verify(productRepository).findById(productUuidCaptor.capture());
@@ -104,20 +106,20 @@ class ProductServiceImplTest {
         //given
         List<Product> productList = List.of(
                 new Product(UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584"),
-                        "My product name", "My description", BigDecimal.valueOf(1), LocalDateTime.MIN),
+                        "Продукт", "Описание", BigDecimal.valueOf(1), LocalDateTime.MIN),
                 new Product(UUID.fromString("ad6aa3ac-8531-4db0-a797-d8c5b6f15d82"),
-                        "My product name 1", "My description 1", BigDecimal.valueOf(2), LocalDateTime.MIN),
+                        "Продукт 1", "Описание 1", BigDecimal.valueOf(2), LocalDateTime.MIN),
                 new Product(UUID.fromString("aff76a7a-dc99-4209-9663-e70c30501942"),
-                        "My product name 2", "My description 2", BigDecimal.valueOf(3), LocalDateTime.MIN)
+                        "Продукт 2", "Описание 2", BigDecimal.valueOf(3), LocalDateTime.MIN)
         );
 
         List<InfoProductDto> expectedList = List.of(
                 new InfoProductDto(UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584"),
-                        "My product name", "My description", BigDecimal.valueOf(1)),
+                        "Продукт", "Описание", BigDecimal.valueOf(1)),
                 new InfoProductDto(UUID.fromString("ad6aa3ac-8531-4db0-a797-d8c5b6f15d82"),
-                        "My product name 1", "My description 1", BigDecimal.valueOf(2)),
+                        "Продукт 1", "Описание 1", BigDecimal.valueOf(2)),
                 new InfoProductDto(UUID.fromString("aff76a7a-dc99-4209-9663-e70c30501942"),
-                        "My product name 2", "My description 2", BigDecimal.valueOf(3))
+                        "Продукт 2", "Описание 2", BigDecimal.valueOf(3))
         );
 
         when(productRepository.findAll()).thenReturn(productList);
@@ -149,7 +151,7 @@ class ProductServiceImplTest {
                 .when(productMapper).toProduct(productDto);
         when(productRepository.save(productToSave)).thenReturn(expected);
 
-        UUID expectedUuid = UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584");
+        UUID expectedUuid = ProductTestData.builder().build().getUuid();
 
         //when
         UUID actualUuid = productService.create(productDto);
@@ -163,7 +165,7 @@ class ProductServiceImplTest {
     @Test
     void updateShouldUpdateDescriptionAndPriceInProduct() {
         //given
-        UUID uuid = UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584");
+        UUID uuid = ProductTestData.builder().build().getUuid();
         Product productToUpdate = ProductTestData.builder()
                 .build().buildProduct();
         ProductDto productDtoToUpdate = ProductTestData.builder()
@@ -200,7 +202,7 @@ class ProductServiceImplTest {
     @Test
     void deleteShouldDeleteProductUsingUuid() {
         //given
-        UUID uuid = UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584");
+        UUID uuid = ProductTestData.builder().build().getUuid();
         //when
         productService.delete(uuid);
         //then
