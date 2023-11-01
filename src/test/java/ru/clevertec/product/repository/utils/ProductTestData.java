@@ -15,10 +15,10 @@ public class ProductTestData {
     private UUID uuid = UUID.fromString("338903f8-ff25-4df4-8348-f8cefc066296");
 
     @Builder.Default
-    private String name = "My product";
+    private String name = "Продукт";
 
     @Builder.Default
-    private String description = "My description";
+    private String description = "Описание продукта";
 
     @Builder.Default
     private BigDecimal price = BigDecimal.valueOf(1);

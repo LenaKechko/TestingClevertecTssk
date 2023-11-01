@@ -6,6 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.clevertec.product.entity.Product;
+import ru.clevertec.product.repository.utils.ProductTestData;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -31,131 +32,134 @@ class InMemoryProductRepositoryTest {
 
     @Test
     void findByIdShouldReturnOptionalProduct() {
-        //given
-        UUID uuid = UUID.fromString("338903f8-ff25-4df4-8348-f8cefc066296");
+        // given
+        UUID uuid = ProductTestData.builder().build().getUuid();
         Product excepted = new Product(uuid, "My product", "My description",
                 BigDecimal.valueOf(1), LocalDateTime.MAX);
         productRepository.save(excepted);
 
-        //when
+        // when
         Product actual = productRepository.findById(uuid).orElseThrow();
 
-        //then
+        // then
         assertEquals(excepted, actual);
     }
 
     @ParameterizedTest
     @MethodSource("provideProductsForTesting")
     void findByIdShouldReturnProductEqualsWithUUID(Product product) {
-        //given
+        // given
         Product expected = productRepository.save(product);
 
-        //when
+        // when
         Product actual = productRepository.findById(expected.getUuid()).orElseThrow();
 
-        //then
+        // then
         assertThat(actual)
                 .hasFieldOrPropertyWithValue(Product.Fields.uuid, expected.getUuid());
     }
 
     @Test
     void findByIdShouldReturnOptionalEmpty() {
-        //given
+        // given
         UUID uuid = UUID.fromString("338903f8-ff25-4df4-8348-f8cefc066297");
         Optional<Product> excepted = Optional.empty();
 
-        //when
+        // when
         Optional<Product> actual = productRepository.findById(uuid);
 
-        //then
+        // then
         assertEquals(excepted, actual);
     }
-
 
     @ParameterizedTest
     @MethodSource("provideArgumentsForFindAll")
     void findAllShouldReturnListProducts(List<Product> products) {
-        //given
+        // given
         List<Product> expected =
                 products.stream()
                         .map(product -> productRepository.save(product))
                         .toList();
 
-        //when
+        // when
         List<Product> actual = productRepository.findAll();
 
-        //then
+        // then
         assertEquals(expected, actual);
     }
 
     @ParameterizedTest
     @MethodSource("provideArgumentsForFindAll")
     void findAllShouldReturnListIsNotEmpty(List<Product> products) {
-        //given
+        // given
         products.forEach(product -> productRepository.save(product));
-        //when
+
+        // when
         int actual = productRepository.findAll().size();
-        //then
+
+        // then
         assertThat(actual).isNotZero();
     }
 
     @Test
     void findAllShouldReturnListIsEmpty() {
-        //given
+        // given
 
-        //when
+        // when
         List<Product> actual = productRepository.findAll();
-        //then
+
+        // then
         assertNull(actual);
     }
 
     @ParameterizedTest
     @MethodSource("provideProductsForTesting")
     void saveShouldReturnSavingProduct(Product product) {
-        //given
+        // given
         Product excepted = product;
 
-        //when
+        // when
         Product actual = productRepository.save(product);
 
-        //then
+        // then
         assertEquals(excepted, actual);
     }
 
     @ParameterizedTest
     @MethodSource("provideProductsForTesting")
     void saveShouldReturnSavingProductCheckReturningUUID(Product product) {
-        //given
+        // given
         UUID excepted = product.getUuid();
 
-        //when
+        // when
         Product actual = productRepository.save(product);
 
-        //then
-        assertThat(actual).hasFieldOrPropertyWithValue(Product.Fields.uuid, excepted);
+        // then
+        assertThat(actual)
+                .hasFieldOrPropertyWithValue(Product.Fields.uuid, excepted);
     }
 
     @Test
     void saveShouldReturnException() {
-        //given
-        Product actual = null;
+        // given
+        Product product = null;
 
-        //when
-
-        //then
+        // when, then
         assertThrows(IllegalArgumentException.class,
-                () -> productRepository.save(actual));
+                () -> productRepository.save(product));
     }
 
     @ParameterizedTest
     @MethodSource("provideProductsForTesting")
-    void deleteExistUUIDShouldReturnSuccess(Product product) {
-        //given
+    void deleteShouldReturnSuccessByExistUUID(Product product) {
+        // given
         Optional<Product> excepted = Optional.empty();
         productRepository.save(product);
-        //when
+
+        // when
         productRepository.delete(product.getUuid());
-        //then
+
+        // then
         Optional<Product> actual = productRepository.findById(product.getUuid());
         assertEquals(excepted, actual);
     }
@@ -163,32 +167,32 @@ class InMemoryProductRepositoryTest {
     public static Stream<Arguments> provideArgumentsForFindAll() {
         return Stream.of(
                 Arguments.of(Arrays
-                        .asList(new Product(UUID.fromString("338903f8-ff25-4df4-8348-f8cefc066296"), "My product", "My description", BigDecimal.valueOf(1), LocalDateTime.MAX),
-                                new Product(UUID.fromString("e495840a-b4ab-40c9-8200-8ed6117ad1a5"), "Another product", "It's description", BigDecimal.valueOf(2), LocalDateTime.MAX),
-                                new Product(UUID.fromString("93af5278-cd77-4c51-bfd7-6ab28e6f7f5f"), "One more product", "His description", BigDecimal.valueOf(3), LocalDateTime.MAX))),
+                        .asList(new Product(UUID.fromString("338903f8-ff25-4df4-8348-f8cefc066296"), "Продукт", "Описание", BigDecimal.valueOf(1), LocalDateTime.MAX),
+                                new Product(UUID.fromString("e495840a-b4ab-40c9-8200-8ed6117ad1a5"), "Мой прод", "Это описание", BigDecimal.valueOf(2), LocalDateTime.MAX),
+                                new Product(UUID.fromString("93af5278-cd77-4c51-bfd7-6ab28e6f7f5f"), "Еще прод", "Описание продукта", BigDecimal.valueOf(3), LocalDateTime.MAX))),
                 Arguments.of(Arrays
-                        .asList(new Product(UUID.fromString("f3f685e2-a0dd-47d8-9da7-d9ac3c64ef09"), "My product 1", "My description 1", BigDecimal.valueOf(11), LocalDateTime.MAX),
-                                new Product(UUID.fromString("080bf8e1-7d88-44a9-952c-12969bf8f7e2"), "Another product 1", "It's description 1", BigDecimal.valueOf(21), LocalDateTime.MAX),
-                                new Product(UUID.fromString("7a041a44-9f86-4d1c-96d0-f390a47054fc"), "One more product 1", "His description 1", BigDecimal.valueOf(31), LocalDateTime.MAX))),
+                        .asList(new Product(UUID.fromString("f3f685e2-a0dd-47d8-9da7-d9ac3c64ef09"), "Продукт 1", "Описание 1", BigDecimal.valueOf(11), LocalDateTime.MAX),
+                                new Product(UUID.fromString("080bf8e1-7d88-44a9-952c-12969bf8f7e2"), "Мой прод 1", "Это описание 1", BigDecimal.valueOf(21), LocalDateTime.MAX),
+                                new Product(UUID.fromString("7a041a44-9f86-4d1c-96d0-f390a47054fc"), "Еще прод 1", "Описание продукта 1", BigDecimal.valueOf(31), LocalDateTime.MAX))),
                 Arguments.of(Arrays
-                        .asList(new Product(UUID.fromString("39ed88c3-58d9-4153-93ce-4d2c951df27c"), "My product 2", "My description 2", BigDecimal.valueOf(12), LocalDateTime.MAX),
-                                new Product(UUID.fromString("328f7a38-f484-454d-b1c1-f010adef4ef9"), "Another product 2", "It's description 2", BigDecimal.valueOf(22), LocalDateTime.MAX),
-                                new Product(UUID.fromString("ee892366-b605-4745-9515-ee7cdd0cebeb"), "One more product 2", "His description 2", BigDecimal.valueOf(32), LocalDateTime.MAX)))
+                        .asList(new Product(UUID.fromString("39ed88c3-58d9-4153-93ce-4d2c951df27c"), "Продукт 2", "Описание 2", BigDecimal.valueOf(12), LocalDateTime.MAX),
+                                new Product(UUID.fromString("328f7a38-f484-454d-b1c1-f010adef4ef9"), "Мой прод 2", "Это описание 2", BigDecimal.valueOf(22), LocalDateTime.MAX),
+                                new Product(UUID.fromString("ee892366-b605-4745-9515-ee7cdd0cebeb"), "Еще прод 2", "Описание продукта 2", BigDecimal.valueOf(32), LocalDateTime.MAX)))
         );
     }
 
     public static Stream<Arguments> provideProductsForTesting() {
         return Stream.of(
                 Arguments.of(Arrays
-                        .asList(new Product(UUID.fromString("338903f8-ff25-4df4-8348-f8cefc066296"), "My product", "My description", BigDecimal.valueOf(1), LocalDateTime.MAX),
-                                new Product(UUID.fromString("e495840a-b4ab-40c9-8200-8ed6117ad1a5"), "Another product", "It's description", BigDecimal.valueOf(2), LocalDateTime.MAX),
-                                new Product(UUID.fromString("93af5278-cd77-4c51-bfd7-6ab28e6f7f5f"), "One more product", "His description", BigDecimal.valueOf(3), LocalDateTime.MAX),
-                                new Product(UUID.fromString("f3f685e2-a0dd-47d8-9da7-d9ac3c64ef09"), "My product 1", "My description 1", BigDecimal.valueOf(11), LocalDateTime.MAX),
-                                new Product(UUID.fromString("080bf8e1-7d88-44a9-952c-12969bf8f7e2"), "Another product 1", "It's description 1", BigDecimal.valueOf(21), LocalDateTime.MAX),
-                                new Product(UUID.fromString("7a041a44-9f86-4d1c-96d0-f390a47054fc"), "One more product 1", "His description 1", BigDecimal.valueOf(31), LocalDateTime.MAX),
-                                new Product(UUID.fromString("39ed88c3-58d9-4153-93ce-4d2c951df27c"), "My product 2", "My description 2", BigDecimal.valueOf(12), LocalDateTime.MAX),
-                                new Product(UUID.fromString("328f7a38-f484-454d-b1c1-f010adef4ef9"), "Another product 2", "It's description 2", BigDecimal.valueOf(22), LocalDateTime.MAX),
-                                new Product(UUID.fromString("ee892366-b605-4745-9515-ee7cdd0cebeb"), "One more product 2", "His description 2", BigDecimal.valueOf(32), LocalDateTime.MAX)))
+                        .asList(new Product(UUID.fromString("338903f8-ff25-4df4-8348-f8cefc066296"), "Продукт", "Описание", BigDecimal.valueOf(1), LocalDateTime.MAX),
+                                new Product(UUID.fromString("e495840a-b4ab-40c9-8200-8ed6117ad1a5"), "Мой прод", "Это описание", BigDecimal.valueOf(2), LocalDateTime.MAX),
+                                new Product(UUID.fromString("93af5278-cd77-4c51-bfd7-6ab28e6f7f5f"), "Еще прод", "Описание продукта", BigDecimal.valueOf(3), LocalDateTime.MAX),
+                                new Product(UUID.fromString("f3f685e2-a0dd-47d8-9da7-d9ac3c64ef09"), "Продукт 1", "Описание 1", BigDecimal.valueOf(11), LocalDateTime.MAX),
+                                new Product(UUID.fromString("080bf8e1-7d88-44a9-952c-12969bf8f7e2"), "Мой прод 1", "Это описание 1", BigDecimal.valueOf(21), LocalDateTime.MAX),
+                                new Product(UUID.fromString("7a041a44-9f86-4d1c-96d0-f390a47054fc"), "Еще прод 1", "Описание продукта 1", BigDecimal.valueOf(31), LocalDateTime.MAX),
+                                new Product(UUID.fromString("39ed88c3-58d9-4153-93ce-4d2c951df27c"), "Продукт 2", "Описание 2", BigDecimal.valueOf(12), LocalDateTime.MAX),
+                                new Product(UUID.fromString("328f7a38-f484-454d-b1c1-f010adef4ef9"), "Мой прод 2", "Это описание 2", BigDecimal.valueOf(22), LocalDateTime.MAX),
+                                new Product(UUID.fromString("ee892366-b605-4745-9515-ee7cdd0cebeb"), "ЕЯще прод 2", "Описание продукта 2", BigDecimal.valueOf(32), LocalDateTime.MAX)))
         );
     }
 }
