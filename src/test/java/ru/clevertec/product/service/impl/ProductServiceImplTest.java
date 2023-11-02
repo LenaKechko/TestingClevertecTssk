@@ -67,8 +67,9 @@ class ProductServiceImplTest {
 
         when(productRepository.save(productToSave))
                 .thenReturn(productSaving);
-        when(productRepository.findById(uuid))
-                .thenReturn(Optional.ofNullable(productSaving));
+
+        when(productRepository.findById(uuid).orElseThrow())
+                .thenReturn(productSaving);
 
         doReturn(expected)
                 .when(productMapper)
@@ -193,7 +194,7 @@ class ProductServiceImplTest {
         when(productValidator.checkValidation(productToSave))
                 .thenReturn(null);
 
-        doThrow(new IllegalArgumentException())
+        doThrow(IllegalArgumentException.class)
                 .when(productRepository.save(null));
 
         // when-then
@@ -221,8 +222,8 @@ class ProductServiceImplTest {
                 .withPrice(BigDecimal.valueOf(4))
                 .build().buildProduct();
 
-        when(productRepository.findById(uuid))
-                .thenReturn(Optional.ofNullable(productToUpdate));
+        when(productRepository.findById(uuid).orElseThrow())
+                .thenReturn(productToUpdate);
 
         doReturn(excepted)
                 .when(productMapper).merge(productToUpdate, productDtoToUpdate);
@@ -263,8 +264,8 @@ class ProductServiceImplTest {
                 .withDescription("My new description")
                 .build().buildProduct();
 
-        when(productRepository.findById(uuid))
-                .thenReturn(Optional.ofNullable(productToUpdate));
+        when(productRepository.findById(uuid).orElseThrow())
+                .thenReturn(productToUpdate);
 
         doReturn(productAfterMerge)
                 .when(productMapper).merge(productToUpdate, productDtoToUpdate);
