@@ -28,7 +28,7 @@ class ProductValidatorTest {
     @Test
     void checkNameShouldReturnFalseWhenNameIsNull() {
         // given
-        String name = null;
+        String name = (String) null;
 
         // when
         boolean expected = productValidator.checkName(name);
@@ -88,7 +88,7 @@ class ProductValidatorTest {
     @Test
     void checkNameShouldReturnTrueWhenNameIsCorrected() {
         // given
-        String name = "Продукт";
+        String name = "продукт";
 
         // when
         boolean expected = productValidator.checkName(name);
