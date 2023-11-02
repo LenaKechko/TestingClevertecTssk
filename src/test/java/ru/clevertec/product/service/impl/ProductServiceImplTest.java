@@ -68,8 +68,8 @@ class ProductServiceImplTest {
         when(productRepository.save(productToSave))
                 .thenReturn(productSaving);
 
-        when(productRepository.findById(uuid).orElseThrow())
-                .thenReturn(productSaving);
+        when(productRepository.findById(uuid))
+                .thenReturn(Optional.ofNullable(productSaving));
 
         doReturn(expected)
                 .when(productMapper)
@@ -222,8 +222,8 @@ class ProductServiceImplTest {
                 .withPrice(BigDecimal.valueOf(4))
                 .build().buildProduct();
 
-        when(productRepository.findById(uuid).orElseThrow())
-                .thenReturn(productToUpdate);
+        when(productRepository.findById(uuid))
+                .thenReturn(Optional.ofNullable(productToUpdate));
 
         doReturn(excepted)
                 .when(productMapper).merge(productToUpdate, productDtoToUpdate);
@@ -264,8 +264,8 @@ class ProductServiceImplTest {
                 .withDescription("My new description")
                 .build().buildProduct();
 
-        when(productRepository.findById(uuid).orElseThrow())
-                .thenReturn(productToUpdate);
+        when(productRepository.findById(uuid))
+                .thenReturn(Optional.ofNullable(productToUpdate));
 
         doReturn(productAfterMerge)
                 .when(productMapper).merge(productToUpdate, productDtoToUpdate);
