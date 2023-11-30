@@ -1,6 +1,7 @@
 package ru.clevertec.product.entity;
 
 import lombok.NoArgsConstructor;
+import ru.clevertec.product.data.ProductDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -9,13 +10,14 @@ import java.time.LocalDateTime;
 public class ProductValidator {
 
     public boolean checkName(String name) {
-        return name != null && !name.isEmpty()
+        return name != null && !name.isBlank()
                 && name.matches("[а-яА-ЯёЁ ]{5,10}");
     }
 
     public boolean checkDescription(String description) {
-        return (description.isEmpty()
-                || description.matches("[а-яА-ЯёЁ ]{10,30}"));
+        return description == null ||
+                description.isBlank() ||
+                description.matches("[а-яА-ЯёЁ ]{10,30}");
     }
 
     public boolean checkPrice(BigDecimal price) {
@@ -26,8 +28,13 @@ public class ProductValidator {
         return created != null;
     }
 
-    public Product checkValidation(Product product) {
+    public boolean checkValidation(Product product) {
         return checkName(product.getName()) && checkDescription(product.getDescription())
-                && checkPrice(product.getPrice()) && checkCreated(product.getCreated()) ? product : null;
+                && checkPrice(product.getPrice()) && checkCreated(product.getCreated());
+    }
+
+    public boolean checkValidation(ProductDto productDto) {
+        return checkName(productDto.getName()) && checkDescription(productDto.getDescription())
+                && checkPrice(productDto.getPrice());
     }
 }

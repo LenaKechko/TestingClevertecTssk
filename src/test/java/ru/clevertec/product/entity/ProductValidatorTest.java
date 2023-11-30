@@ -5,15 +5,14 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
+import ru.clevertec.product.utils.ProductTestData;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProductValidatorTest {
@@ -28,10 +27,9 @@ class ProductValidatorTest {
     @Test
     void checkNameShouldReturnFalseWhenNameIsNull() {
         // given
-        String name = (String) null;
 
         // when
-        boolean expected = productValidator.checkName(name);
+        boolean expected = productValidator.checkName(null);
 
         // then
         assertFalse(expected);
@@ -100,10 +98,9 @@ class ProductValidatorTest {
     @Test
     void checkDescriptionShouldReturnTrueWhenDescriptionIsNull() {
         // given
-        String description = null;
 
         // when
-        boolean expected = productValidator.checkDescription(description);
+        boolean expected = productValidator.checkDescription(null);
 
         // then
         assertTrue(expected);
@@ -185,10 +182,9 @@ class ProductValidatorTest {
     @Test
     void checkPriceShouldReturnFalseWhenValueIsNull() {
         // given
-        BigDecimal price = null;
 
         // when
-        boolean actual = productValidator.checkPrice(price);
+        boolean actual = productValidator.checkPrice(null);
 
         // then
         assertFalse(actual);
@@ -197,10 +193,9 @@ class ProductValidatorTest {
     @Test
     void checkCreatedShouldReturnFalseWhenTimeIsNull() {
         // given
-        LocalDateTime created = null;
 
         // when
-        boolean actual = productValidator.checkCreated(created);
+        boolean actual = productValidator.checkCreated(null);
 
         // then
         assertFalse(actual);
@@ -219,28 +214,27 @@ class ProductValidatorTest {
     }
 
     @Test
-    void checkValidationShouldReturnProductWhenAllFieldsCorrected() {
+    void checkValidationShouldReturnTrueWhenAllFieldsCorrected() {
         // given
-        Product expected = new Product(UUID.fromString("b5028e80-bd7f-463d-9c1f-5e831da5ebef"),
-                "Продукт", "Описание продукта", BigDecimal.valueOf(1), LocalDateTime.MIN);
+        Product product = ProductTestData.builder().build().buildProduct();
 
         // when
-        Product actual = productValidator.checkValidation(expected);
+        boolean actual = productValidator.checkValidation(product);
 
         // then
-        assertEquals(expected, actual);
+        assertTrue(actual);
     }
 
     @ParameterizedTest
     @MethodSource("provideProductArguments")
-    void checkValidationShouldReturnNullWhenOneOfFieldsUncorrected(Product product) {
+    void checkValidationShouldReturnFalseWhenOneOfFieldsUncorrected(Product product) {
         // given
 
         // when
-        Product actual = productValidator.checkValidation(product);
+        boolean actual = productValidator.checkValidation(product);
 
         // then
-        assertNull(actual);
+        assertFalse(actual);
     }
 
     public static Stream<Arguments> provideProductArguments() {
@@ -255,8 +249,6 @@ class ProductValidatorTest {
                         "Мой", "Описание продукта", BigDecimal.valueOf(1), LocalDateTime.MIN)),
                 Arguments.of(new Product(UUID.fromString("b5028e80-bd7f-463d-9c1f-5e831da5ebef"),
                         "Product", "Описание продукта", BigDecimal.valueOf(1), LocalDateTime.MIN)),
-                Arguments.of(new Product(UUID.fromString("b5028e80-bd7f-463d-9c1f-5e831da5ebef"),
-                        "Продукт", null, BigDecimal.valueOf(1), LocalDateTime.MIN)),
                 Arguments.of(new Product(UUID.fromString("b5028e80-bd7f-463d-9c1f-5e831da5ebef"),
                         "Продукт", "Мое очень длинное описание товара для проверки валидации",
                         BigDecimal.valueOf(1), LocalDateTime.MIN)),

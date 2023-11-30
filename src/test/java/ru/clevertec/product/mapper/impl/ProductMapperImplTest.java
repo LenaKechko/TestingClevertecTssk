@@ -35,7 +35,9 @@ class ProductMapperImplTest {
             "Продукт 1, Описание 1, 2",
             "Продукт 2, Описание 2, 3"
     })
-    void toProductShouldReturnProductCheckEqualsFields(String name, String description, int price) {
+    void toProductShouldReturnProductCheckEqualsFields(String name,
+                                                       String description,
+                                                       int price) {
         // given
         ProductDto productDto = new ProductDto(name,
                 description, BigDecimal.valueOf(price));
@@ -110,5 +112,4 @@ class ProductMapperImplTest {
                                 "Продукт 2", "Описание 2", BigDecimal.valueOf(3), LocalDateTime.MIN))
         );
     }
-
 }

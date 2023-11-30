@@ -6,7 +6,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import ru.clevertec.product.entity.Product;
-import ru.clevertec.product.repository.utils.ProductTestData;
+import ru.clevertec.product.utils.ProductTestData;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -18,8 +18,6 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class InMemoryProductRepositoryTest {
 
@@ -109,17 +107,16 @@ class InMemoryProductRepositoryTest {
         List<Product> actual = productRepository.findAll();
 
         // then
-        assertNull(actual);
+        assertThat(actual).isEmpty();
     }
 
     @ParameterizedTest
     @MethodSource("provideProductsForTesting")
-    void saveShouldReturnSavingProduct(Product product) {
+    void saveShouldReturnSavingProduct(Product expected) {
         // given
-        Product expected = product;
 
         // when
-        Product actual = productRepository.save(product);
+        Product actual = productRepository.save(expected);
 
         // then
         assertEquals(expected, actual);
@@ -137,16 +134,6 @@ class InMemoryProductRepositoryTest {
         // then
         assertThat(actual)
                 .hasFieldOrPropertyWithValue(Product.Fields.uuid, excepted);
-    }
-
-    @Test
-    void saveShouldReturnException() {
-        // given
-        Product product = null;
-
-        // when, then
-        assertThrows(IllegalArgumentException.class,
-                () -> productRepository.save(product));
     }
 
     @ParameterizedTest

@@ -15,10 +15,7 @@ public class InMemoryProductRepository implements ProductRepository {
 
     @Override
     public Optional<Product> findById(UUID uuid) {
-        return productMap.entrySet().stream()
-                .filter(el -> el.getKey().equals(uuid))
-                .map(Map.Entry::getValue)
-                .findFirst();
+        return Optional.ofNullable(productMap.get(uuid));
     }
 
     @Override
@@ -29,7 +26,6 @@ public class InMemoryProductRepository implements ProductRepository {
 
     @Override
     public Product save(Product product) {
-        if (product == null) throw new IllegalArgumentException();
         UUID uuid;
         uuid = (product.getUuid() == null) ? UUID.randomUUID() : product.getUuid();
         product.setUuid(uuid);

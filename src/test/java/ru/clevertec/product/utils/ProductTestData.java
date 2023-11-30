@@ -1,7 +1,7 @@
-package ru.clevertec.product.service.util;
+package ru.clevertec.product.utils;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
@@ -10,11 +10,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
 @Builder(setterPrefix = "with", toBuilder = true)
-
 public class ProductTestData {
 
+    @Getter
     @Builder.Default
     private UUID uuid = UUID.fromString("b8003c54-c22b-450a-a0d3-94b646150584");
 
@@ -42,3 +41,4 @@ public class ProductTestData {
         return new InfoProductDto(uuid, name, description, price);
     }
 }
+

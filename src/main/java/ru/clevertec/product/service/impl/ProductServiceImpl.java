@@ -5,6 +5,7 @@ import ru.clevertec.product.data.InfoProductDto;
 import ru.clevertec.product.data.ProductDto;
 import ru.clevertec.product.entity.Product;
 import ru.clevertec.product.entity.ProductValidator;
+import ru.clevertec.product.exception.NotValidException;
 import ru.clevertec.product.exception.ProductNotFoundException;
 import ru.clevertec.product.mapper.ProductMapper;
 import ru.clevertec.product.repository.ProductRepository;
@@ -22,43 +23,34 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public InfoProductDto get(UUID uuid) {
-        InfoProductDto infoProductDto = null;
-        try {
-            Product product = productRepository.findById(uuid).orElseThrow();
-            infoProductDto = mapper.toInfoProductDto(product);
-        } catch (Exception e) {
-            throw new ProductNotFoundException(uuid);
-        }
-        return infoProductDto;
+        return productRepository.findById(uuid)
+                .map(mapper::toInfoProductDto)
+                .orElseThrow(() -> new ProductNotFoundException(uuid));
     }
 
     @Override
     public List<InfoProductDto> getAll() {
         List<Product> productList = productRepository.findAll();
-        List<InfoProductDto> infoProductDtoList = productList.stream()
+        return productList.stream()
                 .map(mapper::toInfoProductDto)
                 .toList();
-        return infoProductDtoList;
     }
 
     @Override
     public UUID create(ProductDto productDto) {
-        Product productWithoutUUID = mapper.toProduct(productDto);
-        Product productToSave = productValidator.checkValidation(productWithoutUUID);
-        try {
-            Product productWithUUID = productRepository.save(productToSave);
+        if (productValidator.checkValidation(productDto)) {
+            Product productWithUUID = productRepository.save(mapper.toProduct(productDto));
             return productWithUUID.getUuid();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+        } else {
+            throw new NotValidException();
         }
-        return null;
     }
 
     @Override
     public void update(UUID uuid, ProductDto productDto) {
-        Product product = productRepository.findById(uuid).orElseThrow();
-        product = productValidator.checkValidation(product);
-        if (product != null) {
+        if (productValidator.checkValidation(productDto)) {
+            Product product = productRepository.findById(uuid)
+                    .orElseThrow(() -> new ProductNotFoundException(uuid));
             Product productMerge = mapper.merge(product, productDto);
             productRepository.save(productMerge);
         }
