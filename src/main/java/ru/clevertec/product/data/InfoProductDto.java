@@ -6,12 +6,12 @@ import java.util.UUID;
 public record InfoProductDto(
 
         /**
-         * Идентификатор не может быть null
+         * идентификатор не может быть null
          */
         UUID uuid,
 
         /**
-         * Имя продукта смотрите {@link ru.clevertec.product.entity.Product}
+         * имя продукта смотрите {@link ru.clevertec.product.entity.Product}
          */
         String name,
 

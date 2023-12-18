@@ -18,7 +18,7 @@ import java.util.UUID;
 public class Product {
 
     /**
-     * Идентификатор продукта (генерируется базой)
+     * идентификатор продукта (генерируется базой)
      */
     private UUID uuid;
 

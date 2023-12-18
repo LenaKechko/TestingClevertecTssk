@@ -10,7 +10,7 @@ import java.util.UUID;
 public interface ProductService {
 
     /**
-     * Ищет продукт по идентификатору
+     * ищет продукт по идентификатору
      *
      * @param uuid идентификатор продукта
      * @return найденный продукт
